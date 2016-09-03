@@ -1,0 +1,5 @@
+requests==2.10.0
+ujson==1.35
+urllib3==1.16
+python-telegram-bot==5.0
+python-dotenv==0.5.1
