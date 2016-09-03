@@ -9,6 +9,10 @@ def encode(input):
 	length = len(chars);
 	encoded = "";
 
+	if input < 0:
+		input *= -1
+		encoded += "-";
+
 	if input == 0:
 		return chars[0];
 
@@ -22,10 +26,15 @@ def encode(input):
 def decode(encoded):
 	length = len(chars);
 	decoded = 0;
+	isNegative = 1;
+
+	# if starts with minus, cut it and make result negative
+	if encoded.startswith("-"):
+		encoded = encoded[1:];
+		isNegative = -1;
 
 	for char in reversed(encoded):
 		val = chars.index(char);
 		decoded = (decoded * length) + val;
 
-	return decoded;
-
+	return decoded * isNegative;

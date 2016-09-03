@@ -11,4 +11,4 @@ Beta! Code is litte bit too simple :)
 
 1. Clone repository
 2. Set bot token in `.env`
-3. Run `.env.example`
+3. Run `main.py`
