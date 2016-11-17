@@ -11,7 +11,7 @@ import re
 import requests
 from uuid import uuid4;
 
-from telegram import InlineQueryResultAudio, ParseMode, InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import InlineQueryResultAudio, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, InlineQueryHandler, CommandHandler
 import logging
 
@@ -19,6 +19,7 @@ import util
 import settings
 import text
 from constants import DATMUSIC_API_ENDPOINT
+from constants import INLINE_QUERY_CACHE_TIME
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -32,33 +33,39 @@ def inlinequery(bot, update):
 
     audios = search(query);
     try:
-        for audio in audios:
-            audio_url = util.generateAudioUrl(audio["owner_id"], audio["aid"])
-            results.append(
-                InlineQueryResultAudio(
-                    id=uuid4(),
-                    audio_url=audio_url,
-                    title=audio["artist"],
-                    performer=audio["title"],
-                    audio_duration=audio["duration"],
-                    reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton(
-                            text="Direct Link",
-                            url=audio_url
-                            )
-                        ]])
+        if audios:
+            for audio in audios:
+                audio_url = util.generateAudioUrl(audio["owner_id"], audio["aid"])
+                results.append(
+                    InlineQueryResultAudio(
+                        id=uuid4(),
+                        audio_url=audio_url,
+                        title=text.decodeArtistTitle(audio["artist"]),
+                        performer=text.decodeArtistTitle(audio["title"]),
+                        audio_duration=audio["duration"],
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton(
+                                text="Direct Link",
+                                url=audio_url
+                                )
+                            ]])
+                    )
                 )
-            )
-
-        bot.answerInlineQuery(update.inline_query.id, results=results)
+            bot.answerInlineQuery(update.inline_query.id, results=results, cache_time=INLINE_QUERY_CACHE_TIME)
     except Exception, e:
         error(bot, update, e)
 
 def search(query):
-    payload = {'auto_complete': 1, 'sort': 2, 'count': 25, 'q': query};
+    if len(query.strip()) < 1:
+        query = text.get_random_artist()
+
+    logger.info("Search query is '%s'" % query)
+
+    payload = {'auto_complete': 1, 'sort': 2, 'count': 50, 'q': query};
     result = requests.get(DATMUSIC_API_ENDPOINT, params = payload);
     
     response = result.json()["response"];
+
     # remove count from response
     del response[0];
     
