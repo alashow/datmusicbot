@@ -51,7 +51,7 @@ def inlinequery(bot, update):
                             ]])
                     )
                 )
-            bot.answerInlineQuery(update.inline_query.id, results=results, cache_time=INLINE_QUERY_CACHE_TIME)
+            update.inline_query.answer(results=results, cache_time=INLINE_QUERY_CACHE_TIME)
     except Exception, e:
         error(bot, update, e)
 

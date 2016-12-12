@@ -39,10 +39,10 @@ artists = ["2 Cellos", "Agnes Obel", "Aloe Black", "Andrew Belle", "Angus Stone"
            "deadmau5", "pg.lost", "Ólafur Arnalds"]
 
 def start(bot, update):
-    bot.send_message(chat_id=update.message.chat.id, text=START_TEXT.format(bot_name=bot.name))
+    update.message.reply_text(START_TEXT.format(bot_name=bot.name))
 
 def about(bot, update):
-    bot.send_message(chat_id=update.message.chat.id, text=ABOUT_TEXT.format(bot_name=bot.name, version=__version__),
+    update.message.reply_text(ABOUT_TEXT.format(bot_name=bot.name, version=__version__),
                      parse_mode=ParseMode.HTML)
 
 def get_random_artist():
