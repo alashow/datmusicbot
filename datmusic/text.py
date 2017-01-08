@@ -47,6 +47,3 @@ def about(bot, update):
 
 def get_random_artist():
 	return random.choice(artists)
-
-def decodeArtistTitle(text):
-	return text.replace("&amp;", "&")

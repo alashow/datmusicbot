@@ -15,7 +15,6 @@ from telegram import InlineQueryResultAudio, ParseMode, InlineKeyboardMarkup, In
 from telegram.ext import Updater, InlineQueryHandler, CommandHandler
 import logging
 
-import util
 import settings
 import text
 from constants import DATMUSIC_API_ENDPOINT
@@ -31,22 +30,22 @@ def inlinequery(bot, update):
     query = update.inline_query.query
     results = list()
 
-    audios = search(query);
+    # search and trim result to 50, which is max result count for inline query answer
+    audios = search(query)[:50]; 
     try:
         if audios:
             for audio in audios:
-                audio_url = util.generateAudioUrl(audio["owner_id"], audio["aid"])
                 results.append(
                     InlineQueryResultAudio(
                         id=uuid4(),
-                        audio_url=audio_url,
-                        title=text.decodeArtistTitle(audio["artist"]),
-                        performer=text.decodeArtistTitle(audio["title"]),
+                        audio_url=audio['download'],
+                        title=audio["artist"],
+                        performer=audio["title"],
                         audio_duration=audio["duration"],
                         reply_markup=InlineKeyboardMarkup(
                             [[InlineKeyboardButton(
-                                text="Direct Link",
-                                url=audio_url
+                                    text="Direct Link",
+                                    url=audio['download']
                                 )
                             ]])
                     )
@@ -61,13 +60,10 @@ def search(query):
 
     logger.info("Search query is '%s'" % query)
 
-    payload = {'auto_complete': 1, 'sort': 2, 'count': 50, 'q': query};
+    payload = {'q': query};
     result = requests.get(DATMUSIC_API_ENDPOINT, params = payload);
     
-    response = result.json()["response"];
-
-    # remove count from response
-    del response[0];
+    response = result.json()["data"];
     
     return response;
 
