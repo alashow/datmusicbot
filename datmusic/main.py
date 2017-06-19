@@ -39,8 +39,8 @@ def inlinequery(bot, update):
                     InlineQueryResultAudio(
                         id=uuid4(),
                         audio_url=audio['download'],
-                        title=audio["artist"],
-                        performer=audio["title"],
+                        title=audio["title"],
+                        performer=audio["artist"],
                         audio_duration=audio["duration"]
                     )
                 )
