@@ -41,13 +41,7 @@ def inlinequery(bot, update):
                         audio_url=audio['download'],
                         title=audio["artist"],
                         performer=audio["title"],
-                        audio_duration=audio["duration"],
-                        reply_markup=InlineKeyboardMarkup(
-                            [[InlineKeyboardButton(
-                                    text="Direct Link",
-                                    url=audio['download']
-                                )
-                            ]])
+                        audio_duration=audio["duration"]
                     )
                 )
             update.inline_query.answer(results=results, cache_time=INLINE_QUERY_CACHE_TIME)
