@@ -11,7 +11,7 @@ import re
 import requests
 from uuid import uuid4;
 
-from telegram import InlineQueryResultAudio, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import InlineQueryResultAudio, InlineQueryResultGif, InputTextMessageContent, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, InlineQueryHandler, CommandHandler
 import logging
 
@@ -19,6 +19,7 @@ import settings
 import text
 from constants import DATMUSIC_API_ENDPOINT
 from constants import INLINE_QUERY_CACHE_TIME
+from constants import DEFAULT_HEADERS
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -30,11 +31,20 @@ def inlinequery(bot, update):
     query = update.inline_query.query
     results = list()
 
-    # search and trim result to 50, which is max result count for inline query answer
-    audios = search(query)[:50]; 
+    cache_time = INLINE_QUERY_CACHE_TIME
+    audios = search(query); 
+    print(f"Found {len(audios)} results for query '{query}'")
     try:
-        if audios:
-            for audio in audios:
+        if not audios:
+            cache_time = 300
+            results.append(InlineQueryResultGif(id=uuid4(),
+                                           gif_url='https://media.giphy.com/media/sS8YbjrTzu4KI/giphy.gif',
+                                           thumb_url='https://media.giphy.com/media/sS8YbjrTzu4KI/giphy.gif',
+                                            title="Failed You",
+                                            input_message_content=InputTextMessageContent(f"youtube.com/results?search_query={query}")))
+        else:
+            # trim result to 50, which is max result count for inline query answer
+            for audio in audios[:50]:
                 results.append(
                     InlineQueryResultAudio(
                         id=uuid4(),
@@ -44,8 +54,8 @@ def inlinequery(bot, update):
                         audio_duration=audio["duration"]
                     )
                 )
-            update.inline_query.answer(results=results, cache_time=INLINE_QUERY_CACHE_TIME)
-    except Exception, e:
+        update.inline_query.answer(results=results, cache_time=cache_time)
+    except Exception as e:
         error(bot, update, e)
 
 def search(query):
@@ -55,9 +65,12 @@ def search(query):
     logger.info("Search query is '%s'" % query)
 
     payload = {'q': query};
-    result = requests.get(DATMUSIC_API_ENDPOINT, params = payload);
+    result = requests.get(DATMUSIC_API_ENDPOINT, params=payload, headers=DEFAULT_HEADERS);
     
-    response = result.json()["data"];
+    try:
+        response = result.json()["data"];
+    except:
+        print(f"Failed to parse response: {result.json()}") 
     
     return response;
 
