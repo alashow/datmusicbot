@@ -4,7 +4,6 @@ https://telegram.me/datmusicbot
 
 Simple telegram bot to download music from datmusic (https://github.com/alashow/music).
 Currently just works with inline queries.
-Caution! Bot implementation is a litte bit too simple :)
 
 # Setup
 
