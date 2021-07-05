@@ -24,14 +24,14 @@ from constants import INLINE_QUERY_CACHE_TIME
 from constants import DEFAULT_HEADERS
 from constants import LINKS_MODE_SUFFIX
 
-captchaLocked = False
-captchaLockParams = {}
-
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+captchaLocked = False
+captchaLockParams = {}
 
 def handleInlineQuery(bot, update):
     callerName = update.inline_query.from_user.name
@@ -89,9 +89,10 @@ def buildInlineAudioResults(audios, linksMode):
 
 def onCaptchaLock(error, query):
     global captchaLocked, captchaLockParams
-    captchaLocked = True
     captchaLockParams.update(error)
-    captchaLockParams.update({'q': query})
+    if not captchaLocked:
+        captchaLockParams.update({'q': query})
+    captchaLocked = True
 
 def replyCaptchaInline(query, bot, update):
     if captchaLocked and captchaLockParams:
@@ -172,7 +173,6 @@ def main():
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
-
 
 if __name__ == '__main__':
     main()
