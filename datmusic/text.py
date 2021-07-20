@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from constants import __version__
-
-import logging
-import re
 import random
 
 from telegram import ParseMode
-from telegram.ext import ConversationHandler
+
+from constants import __version__
 
 START_TEXT = """
 Usage: search music by typing {bot_name} in a chat.
@@ -38,12 +35,14 @@ artists = ["2 Cellos", "Agnes Obel", "Aloe Black", "Andrew Belle", "Angus Stone"
            "VLNY", "Wye Oak", "X ambassadors", "Yann Tiersen", "Yiruma", "Young Summer", "Zack Hemsey", "Zinovia",
            "deadmau5", "pg.lost", "Ólafur Arnalds"]
 
+
 def start(bot, update):
     update.message.reply_text(START_TEXT.format(bot_name=bot.name))
 
+
 def about(bot, update):
-    update.message.reply_text(ABOUT_TEXT.format(bot_name=bot.name, version=__version__),
-                     parse_mode=ParseMode.HTML)
+    update.message.reply_text(ABOUT_TEXT.format(bot_name=bot.name, version=__version__), parse_mode=ParseMode.HTML)
+
 
 def get_random_artist():
-	return random.choice(artists)
+    return random.choice(artists)
