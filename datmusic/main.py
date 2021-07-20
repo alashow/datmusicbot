@@ -124,12 +124,18 @@ def reply_captcha_inline(query, bot, update):
         update.inline_query.answer(results=results, cache_time=0)
 
 
-def search(query, links_mode, bot, update):
+def search(query, links_mode, bot, update, search_type=None):
+    is_minerva_search = False
+
+    if search_type is None:
+        search_type = 'minerva'
+        is_minerva_search = True
+
     global captchaLocked, captchaLockParams
     if len(query.strip()) < 1:
         query = text.get_random_artist()
 
-    payload = {'q': query}
+    payload = {'q': query, 'types[]': [search_type]}
 
     if captchaLocked:
         payload.update(captchaLockParams)
@@ -139,10 +145,13 @@ def search(query, links_mode, bot, update):
     try:
         response = result.json()
         if response['status'] == 'ok':
-            response = response["data"]
+            results = response["data"][search_type]
+            if not results and is_minerva_search:
+                logger.info('Minerva returned empty results, falling back to audios')
+                return search(query, links_mode, bot, update, 'audios')
             captchaLocked = False
             captchaLockParams = {}
-            reply_audio_search_results(response, query, links_mode, bot, update)
+            reply_audio_search_results(results, query, links_mode, bot, update)
         else:
             error = response['error']
 
